@@ -24,7 +24,7 @@ const tracks: Track[] = [
     firstId: 1,
     secondId: 2,
     distance: 704,
-    surface: Surface.ASPHALT,
+    surface: Surface.GROUND,
     maxSpeed: MaxSpeed.NORMAL,
   },
   {
@@ -47,16 +47,29 @@ interface ChartData {
   x: number[];
   y: number[];
   lineColors: string[];
+  areaColors: string[];
+  names: string[];
 }
 
 function chooseLineColor(surface: MaxSpeed): string {
   switch (surface) {
     case MaxSpeed.FAST:
-      return "red";
+      return "rgb(207,172,0)";
     case MaxSpeed.NORMAL:
-      return "blue";
+      return "rgb(54,119,160)";
     case MaxSpeed.SLOW:
-      return "orange";
+      return "rgb(207,0,0)";
+  }
+}
+
+function chooseAreaColor(surface: Surface): string {
+  switch (surface) {
+    case Surface.ASPHALT:
+      return "rgb(202,202,201)";
+    case Surface.GROUND:
+      return "rgb(205,247,201)";
+    case Surface.SAND:
+      return "rgb(246,249,200)";
   }
 }
 
@@ -65,7 +78,13 @@ function getChartData(points: Point[], tracks: Track[]): ChartData {
     throw Error(); // TODO text
   }
 
-  const chartData: ChartData = { x: [], y: [], lineColors: [] };
+  const chartData: ChartData = {
+    x: [],
+    y: [],
+    lineColors: [],
+    areaColors: [],
+    names: [],
+  };
   let totalDistance = 0;
 
   for (let i = 0; i < points.length; i++) {
@@ -81,9 +100,11 @@ function getChartData(points: Point[], tracks: Track[]): ChartData {
 
     chartData.x.push(totalDistance);
     chartData.y.push(points[i].height);
+    chartData.names.push(points[i].name);
 
     if (notLastIteration) {
       chartData.lineColors.push(chooseLineColor(tracks[i].maxSpeed));
+      chartData.areaColors.push(chooseAreaColor(tracks[i].surface));
       totalDistance += tracks[i].distance;
     }
   }
@@ -98,6 +119,7 @@ function App() {
     <LineChart
       xAxis={[
         {
+          id: "line",
           data: chartData.x,
           scaleType: "point",
           min: 0,
@@ -107,16 +129,43 @@ function App() {
             colors: chartData.lineColors,
           },
         },
+        {
+          id: "area",
+          data: chartData.x,
+          scaleType: "point",
+          min: 0,
+          colorMap: {
+            type: "piecewise",
+            thresholds: chartData.x.slice(1),
+            colors: chartData.areaColors,
+          },
+        },
       ]}
       yAxis={[
         {
           min: 0,
         },
       ]}
+      tooltip={{
+        trigger: "item",
+      }}
+      axisHighlight={{
+        x: "none",
+        y: "none",
+      }}
       series={[
         {
+          // data: chartData.y,
+          data: new Array(chartData.y.length).fill(Math.max(...chartData.y)), // TODO подумать
+          xAxisKey: "area",
+          area: true,
+          showMark: false,
+        },
+        {
           data: chartData.y,
-          color: "red",
+          xAxisKey: "line",
+          valueFormatter: (element, context) =>
+            `${chartData.names[context.dataIndex]} (${element}м)`,
         },
       ]}
       width={1000}
