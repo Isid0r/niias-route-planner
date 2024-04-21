@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/niias-route-planner/static/css/main.bc8ae95c.css",
-    "main.js": "/niias-route-planner/static/js/main.7ac6728d.js",
+    "main.css": "/niias-route-planner/static/css/main.ce0793cf.css",
+    "main.js": "/niias-route-planner/static/js/main.8a0680b4.js",
     "static/js/453.12c8614c.chunk.js": "/niias-route-planner/static/js/453.12c8614c.chunk.js",
     "index.html": "/niias-route-planner/index.html",
-    "main.bc8ae95c.css.map": "/niias-route-planner/static/css/main.bc8ae95c.css.map",
-    "main.7ac6728d.js.map": "/niias-route-planner/static/js/main.7ac6728d.js.map",
+    "main.ce0793cf.css.map": "/niias-route-planner/static/css/main.ce0793cf.css.map",
+    "main.8a0680b4.js.map": "/niias-route-planner/static/js/main.8a0680b4.js.map",
     "453.12c8614c.chunk.js.map": "/niias-route-planner/static/js/453.12c8614c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.bc8ae95c.css",
-    "static/js/main.7ac6728d.js"
+    "static/css/main.ce0793cf.css",
+    "static/js/main.8a0680b4.js"
   ]
 }
