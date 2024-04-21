@@ -1,14 +1,13 @@
 import { LineChart } from "@mui/x-charts";
 import { Box, Grid, Slider, SxProps, Theme } from "@mui/material";
 import { PiecewiseColorConfig } from "@mui/x-charts/models/colorMapping";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getChartData } from "../../business-logic/chart-data-converter";
 import {
   generatePoints,
   generateTracks,
 } from "../../business-logic/test-data-generator";
 import { useSlider } from "../../hooks/use-slider";
-import { slideHorizontalContainerSx, slideVerticalContainerSc } from "./styles";
 import { ChartData } from "../../abstractions/chart-data";
 
 const points = generatePoints(100);
@@ -83,10 +82,23 @@ export function InnerChart(props: {
 }
 
 export function RaceChart() {
-  const chartData = useMemo(
-    () => getChartData(points, tracks),
-    [points, tracks]
-  );
+  const [chartData, setChartData] = useState<ChartData>({
+    x: [],
+    y: [],
+    lineColors: [],
+    areaColors: [],
+    names: [],
+  }); // TODO добавить скелетон
+
+  useEffect(() => {
+    const countStr = new URLSearchParams(window.location.search).get("count");
+    const count = countStr !== null ? parseInt(countStr) : null;
+
+    const points = generatePoints(!count || count < 0 ? 100 : count);
+    const tracks = generateTracks(points);
+
+    setChartData(getChartData(points, tracks));
+  }, []);
 
   const maxWidth = chartData.x.slice(-1).pop() ?? 0;
   const maxHeight = Math.max(...chartData.y);
@@ -95,56 +107,55 @@ export function RaceChart() {
   const [sliderY, onSliderYChange] = useSlider(maxHeight);
 
   return (
-    <Grid container spacing={0} sx={{ padding: "20px", height: "100%" }}>
-      <Grid container item>
-        <Grid item xs="auto">
-          <Box sx={slideVerticalContainerSc}>
-            <Slider
-              sx={{
-                height: "80%",
-              }}
-              orientation="vertical"
-              value={sliderY}
-              onChange={onSliderYChange}
-              valueLabelDisplay="auto"
-              min={0}
-              max={maxHeight}
-              size="small"
-            />
-          </Box>
-        </Grid>
-        <Grid item xs>
-          <InnerChart
-            chartData={chartData}
-            minX={sliderX[0]}
-            maxX={sliderX[1]}
-            minY={sliderY[0]}
-            maxY={sliderY[1]}
-          />
-        </Grid>
-      </Grid>
-      <Grid item xs="auto">
-        <Box
-          sx={{
-            width: "50px",
-            height: "50px",
-          }}
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateAreas: `"vs c"
+                          ". hs"`,
+        height: "100%",
+        gridTemplateColumns: "5% 95%",
+        gridTemplateRows: "95% 5%",
+      }}
+    >
+      <Slider
+        sx={{
+          gridArea: "vs",
+          height: "80%",
+          alignSelf: "center",
+          justifySelf: "center",
+        }}
+        orientation="vertical"
+        value={sliderY}
+        onChange={onSliderYChange}
+        valueLabelDisplay="auto"
+        min={0}
+        max={maxHeight}
+        size="small"
+      />
+      <Box sx={{ gridArea: "c" }}>
+        <InnerChart
+          chartData={chartData} // TODO тут временно заменил значения из скроллов, ибо они не обновляются
+          minX={0}
+          maxX={maxWidth}
+          minY={0}
+          maxY={maxHeight}
         />
-      </Grid>
-      <Grid item xs>
-        <Box sx={slideHorizontalContainerSx}>
-          <Slider
-            sx={{ width: "80%" }}
-            disableSwap
-            value={sliderX}
-            onChange={onSliderXChange}
-            valueLabelDisplay="auto"
-            min={0}
-            max={maxWidth}
-            size="small"
-          />
-        </Box>
-      </Grid>
-    </Grid>
+      </Box>
+      <Slider
+        sx={{
+          gridArea: "hs",
+          width: "80%",
+          alignSelf: "center",
+          justifySelf: "center",
+        }}
+        disableSwap
+        value={sliderX}
+        onChange={onSliderXChange}
+        valueLabelDisplay="auto"
+        min={0}
+        max={maxWidth}
+        size="small"
+      />
+    </Box>
   );
 }
