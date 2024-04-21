@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useSlider(
   max: number
@@ -8,6 +8,10 @@ export function useSlider(
 ] {
   const [value, setValue] = useState<number[]>([0, max]);
   const minDistance = Math.floor(max / 20);
+
+  useEffect(() => {
+    setValue([0, max]);
+  }, [max]);
 
   const onChange = (
     event: Event,

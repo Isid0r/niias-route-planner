@@ -1,8 +1,7 @@
 import { ChartData } from "../abstractions/chart-data";
-import { Point } from "../abstractions/point";
-import { Track } from "../abstractions/track";
 import { MaxSpeed } from "../enums/max-speed";
 import { Surface } from "../enums/surface";
+import { getPoints, getTracks } from "./api";
 
 function chooseLineColor(surface: MaxSpeed): string {
   switch (surface) {
@@ -26,9 +25,15 @@ function chooseAreaColor(surface: Surface): string {
   }
 }
 
-export function getChartData(points: Point[], tracks: Track[]): ChartData {
+// в реальной ситуации здесь не будет count
+export async function getChartData(count: number): Promise<ChartData> {
+  const points = await getPoints(count);
+  const tracks = await getTracks(points);
+
   if (points.length - 1 !== tracks.length) {
-    throw Error(); // TODO text
+    throw Error(
+      "Количество полученных треков должно быть меньше, чем количество точек, на 1!"
+    );
   }
 
   const chartData: ChartData = {
@@ -48,7 +53,13 @@ export function getChartData(points: Point[], tracks: Track[]): ChartData {
       (tracks[i].firstId !== points[i].id ||
         tracks[i].secondId !== points[i + 1].id)
     ) {
-      throw Error(); // TODO text
+      throw Error(
+        `Трек не соответствует необходимым точкам!\nТрек: ${JSON.stringify(
+          tracks[i]
+        )}\nТочка 1: ${JSON.stringify(points[i])}\nТочка 2: ${JSON.stringify(
+          points[i + 1]
+        )}`
+      );
     }
 
     chartData.x.push(totalDistance);

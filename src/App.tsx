@@ -1,7 +1,7 @@
-import { RaceChart } from "./components/race-chart";
+import { RoutePlanner } from "./components/route-planner";
 
 function App() {
-  return <RaceChart />;
+  return <RoutePlanner />;
 }
 
 export default App;
