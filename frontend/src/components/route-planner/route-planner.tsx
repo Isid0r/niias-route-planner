@@ -17,20 +17,18 @@ export function RoutePlanner() {
     const countStr = new URLSearchParams(window.location.search).get("count");
     const count = countStr !== null ? parseInt(countStr) : null;
 
-    setTimeout(() => {
-      async function prepare() {
-        try {
-          setChartData(
-            await getChartData(!count || count <= 1 ? countDefault : count)
-          );
-        } catch (error) {
-          console.error(error);
-          setErrorState(true);
-        }
+    async function prepare() {
+      try {
+        setChartData(
+          await getChartData(!count || count <= 1 ? countDefault : count)
+        );
+      } catch (error) {
+        console.error(error);
+        setErrorState(true);
       }
+    }
 
-      prepare();
-    }, 1000);
+    prepare();
   }, []);
 
   // TODO здесь подумать как покрасивее все это сделать
