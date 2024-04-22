@@ -14,6 +14,16 @@ export function generatePoints(length: number): Point[] {
   });
 }
 
+export function generateTrack(firstId: number, secondId: number): Track {
+  return {
+    firstId,
+    secondId,
+    distance: randomNumber(500, 2000),
+    surface: randomEnumValue(Surface),
+    maxSpeed: randomEnumValue(MaxSpeed),
+  };
+}
+
 export function generateTracks(points: Point[]): Track[] {
   const tracks = new Array<Track>();
   for (let i = 0; i < points.length - 1; i++) {

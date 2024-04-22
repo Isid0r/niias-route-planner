@@ -1,7 +1,7 @@
 import { ChartData } from "../abstractions/chart-data";
 import { MaxSpeed } from "../enums/max-speed";
 import { Surface } from "../enums/surface";
-import { getPoints, getTracks } from "./api";
+import { getPoints, getTrack } from "./api";
 
 function chooseLineColor(surface: MaxSpeed): string {
   switch (surface) {
@@ -28,14 +28,6 @@ function chooseAreaColor(surface: Surface): string {
 // в реальной ситуации здесь не будет count
 export async function getChartData(count: number): Promise<ChartData> {
   const points = await getPoints(count);
-  const tracks = await getTracks(points);
-
-  if (points.length - 1 !== tracks.length) {
-    throw Error(
-      "Количество полученных треков должно быть меньше, чем количество точек, на 1!"
-    );
-  }
-
   const chartData: ChartData = {
     x: [],
     y: [],
@@ -46,30 +38,15 @@ export async function getChartData(count: number): Promise<ChartData> {
   let totalDistance = 0;
 
   for (let i = 0; i < points.length; i++) {
-    const notLastIteration = i < points.length - 1;
-
-    if (
-      notLastIteration &&
-      (tracks[i].firstId !== points[i].id ||
-        tracks[i].secondId !== points[i + 1].id)
-    ) {
-      throw Error(
-        `Трек не соответствует необходимым точкам!\nТрек: ${JSON.stringify(
-          tracks[i]
-        )}\nТочка 1: ${JSON.stringify(points[i])}\nТочка 2: ${JSON.stringify(
-          points[i + 1]
-        )}`
-      );
-    }
-
     chartData.x.push(totalDistance);
     chartData.y.push(points[i].height);
-    chartData.names.push(points[i].name);
 
-    if (notLastIteration) {
-      chartData.lineColors.push(chooseLineColor(tracks[i].maxSpeed));
-      chartData.areaColors.push(chooseAreaColor(tracks[i].surface));
-      totalDistance += tracks[i].distance;
+    if (i < points.length - 1) {
+      const track = await getTrack(points[i].id, points[i + 1].id);
+      chartData.names.push(points[i].name);
+      chartData.lineColors.push(chooseLineColor(track.maxSpeed));
+      chartData.areaColors.push(chooseAreaColor(track.surface));
+      totalDistance += track.distance;
     }
   }
 

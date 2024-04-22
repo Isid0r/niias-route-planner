@@ -21,7 +21,7 @@ export function RoutePlanner() {
       async function prepare() {
         try {
           setChartData(
-            await getChartData(!count || count < 0 ? countDefault : count)
+            await getChartData(!count || count <= 1 ? countDefault : count)
           );
         } catch (error) {
           console.error(error);
