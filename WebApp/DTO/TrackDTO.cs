@@ -1,9 +1,26 @@
-﻿using WebApp.Enums;
+﻿using WebApp.DB.Models;
+using WebApp.Enums;
 
-namespace WebApp.Models;
+namespace WebApp.DTO;
 
-public class Track
+/// <summary>
+/// Отрезок. Определяет характеристики участка маршрута между 2 соседними точками  
+/// </summary>
+public class TrackDTO
 {
+    public TrackDTO()
+    {
+    }
+
+    public TrackDTO(Track track)
+    {
+        FirstId = track.FirstId;
+        SecondId = track.SecondId;
+        Distance = track.Distance;
+        Surface = track.Surface;
+        MaxSpeed = track.MaxSpeed;
+    }
+
     /// <summary>
     /// Id первой точки
     /// </summary>
@@ -29,3 +46,4 @@ public class Track
     /// </summary>
     public MaxSpeed MaxSpeed { get; set; }
 }
+

@@ -1,41 +1,104 @@
-using Microsoft.AspNetCore.Mvc;
-using WebApp.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApp.DB;
+using WebApp.DB.Models;
+using WebApp.DTO;
 
-namespace WebApp.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class PointsController : ControllerBase
+namespace WebApp.Controllers
 {
-    private readonly ILogger<PointsController> _logger;
-
-    public PointsController(ILogger<PointsController> logger)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PointsController : ControllerBase
     {
-        _logger = logger;
-    }
+        private readonly SQLiteContext _context;
 
-    [HttpGet]
-    public IEnumerable<Point> Get()
-    {
-        return new List<Point>();
-        //return Enumerable.Range(1, 5).Select(index => new Point
-        //{
-        //    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        //    TemperatureC = Random.Shared.Next(-20, 55),
-        //    Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        //})
-        //.ToArray();
-    }
+        public PointsController(SQLiteContext context)
+        {
+            _context = context;
+        }
 
-    //[HttpGet(Name = "GetWeatherForecast")]
-    //public IEnumerable<Point> Get()
-    //{
-    //    return Enumerable.Range(1, 5).Select(index => new Point
-    //    {
-    //        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-    //        TemperatureC = Random.Shared.Next(-20, 55),
-    //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-    //    })
-    //    .ToArray();
-    //}
+        // GET: api/Points
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PointDTO>>> GetPoints()
+        {
+            return await _context.Points.Select(q => new PointDTO(q)).ToListAsync();
+        }
+
+        // GET: api/Points/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PointDTO>> GetPoint(int id)
+        {
+            var point = await _context.Points.FindAsync(id);
+
+            if (point == null)
+            {
+                return NotFound();
+            }
+
+            return new PointDTO(point);
+        }
+
+        // PUT: api/Points/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPoint(int id, PointDTO point)
+        {
+            if (id != point.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(new Point(point)).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PointExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Points
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<PointDTO>> PostPoint(PointDTO point)
+        {
+            _context.Points.Add(new Point(point));
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetPoint", new { id = point.Id }, point);
+        }
+
+        // DELETE: api/Points/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePoint(int id)
+        {
+            var point = await _context.Points.FindAsync(id);
+            if (point == null)
+            {
+                return NotFound();
+            }
+
+            _context.Points.Remove(point);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool PointExists(int id)
+        {
+            return _context.Points.Any(e => e.Id == id);
+        }
+    }
 }
